@@ -1,7 +1,7 @@
 To-d-O-matic
 ============
 
-To-d-O-Matic 0.1.0
+To-d-O-Matic 0.1.1
 
 Copyright 2014 Sak Lee <mail@saklee.net>
 Some rights reserved.
@@ -12,16 +12,29 @@ Written in Chicken Scheme 4.8.0
 Description
 -----------
 
-To-d-O-Matic is a console-based to-do planner with the ncurses frontend and a corny name. It is designed to be lightweight, minimalistic, and intuitive, and is made for those who always keep at least one console window open, who do not trust the web-based to-do apps with slow response and excess eye-candy, and who do not have time to check their "iWhatever" devices every five minutes.
+To-d-O-Matic is a console-based to-do planner with the ncurses frontend and a corny name. It is designed to be lightweight, minimalistic, and intuitive, and is made for those who always keep at least one console window open, who do not trust the web-based to-do apps with slow response and excessive eye-candy, and who do not have time to check their "iWhatever" devices every five minutes.
 
-This software is under alpha stage, and most of the features are not implemented.
+This software is under alpha stage, and many features are not implemented.
 
 
 Changes
 -------
 
++ 0.1.1
+ - Implemented color-coded item list and cursor movement.
 + 0.1.0
  - Basic, runnable ncurses skeleton with file IO.
+
+
+To-do
+-----
+
++ Implement the lower half of the screen
+ - Entry detail / input form
++ Implement the New & Delete functionalities
+ - Dialog using the lower half of the screen
++ Implement the Defer functionalities
+ - Quick dialog style
 
 
 License
@@ -51,10 +64,9 @@ Features
 + Implemented:
  - Auto-save and load on start and exit
  - Toggle between todo list and done list
+ - Order and color items based on time priority
 
 + Unimplemented:
  - Add, delete, and defer items
  - Append notes for the detail
- - Order and color items based on time priority
  - Categorize with custom categories
- - Auto-completion for every text entry
