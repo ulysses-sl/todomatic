@@ -102,7 +102,7 @@
   (cond
     ((null? data) '())
     ((= cursor 0) (cdr data))
-    (else (cons (car data) (remove-data (cdr data) (-- cursor))))))
+    (else (cons (car data) (remove-entry (cdr data) (-- cursor))))))
 
 ;;; insert new or taken-out entry into data
 (define (insert-entry data entry)
@@ -377,7 +377,7 @@
     (iterate-entries data cursor top 0 0)))
 
 (define (new-entry-dialog data)
-  (insert-entry data `(,(current-time) "categor1" "categor2" "title" "whatever")))
+  (insert-entry data `(,(current-time) "categor1" "categor2" "title" "whatever lorem ipsum")))
 
 (define (edit-entry-dialog data cursor)
   data)
