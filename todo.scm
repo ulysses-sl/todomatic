@@ -402,6 +402,14 @@
         (values (-- cursor) (-- top))
         (values (-- cursor) top)))))
 
+(define (cursor-align data old-cursor top)
+  (let-if (> old-cursor (-- (length data)))
+          ((cursor (-- (length data))))
+          ((cursor old-cursor))
+          (if (< cursor top)
+            (values cursor cursor)
+            (values cursor top))))
+
 ;;;
 ;;; Main program
 ;;;
@@ -415,69 +423,67 @@
   (save-data
     (call/cc
       (lambda (save)
-        (let ((todo done cursor top page
+        (let ((todo done old-cursor old-top page
                 (call/cc
                   (lambda (current-data)
                     (set! update current-data) (load-data)))))
           ; align cursor and top
-          (if (eqv? page 'todopage)
-            (if (> cursor (-- (length todo)))
-              (set! cursor (-- (length todo))))
-            (if (> cursor (-- (length done)))
-              (set! cursor (-- (length done)))))
-          (if (< cursor top) (set! top cursor))
-          ; actual drawing
+          (let-if
+            (eqv? page 'todopage)
+            ((cursor top (cursor-align todo old-cursor old-top)))
+            ((cursor top (cursor-align done old-cursor old-top)))
+            ; actual drawing
             (draw-main todo done cursor top page)
-          ; then wait input to process
-          (let ((input (getch)))
-            (cond
-              ; (Q)uit
-              ((or (eqv? input #\Q) (eqv? input #\q))
-                (save (list todo done))) 
-              ; (N)ew
-              ((or (eqv? input #\N) (eqv? input #\n))
-                (update (new-entry-dialog todo) done 0 0 'todopage))
-              ; (D)elete
-              ((or (eqv? input #\D) (eqv? input #\d))
-                (let-if (eqv? page 'todopage)
-                  ((new-todo (remove-entry todo cursor)) (new-done done))
-                  ((new-todo todo) (new-done (remove-entry done cursor)))
-                  (update new-todo new-done cursor top page)))
-              ; (E)dit
-              ((or (eqv? input #\E) (eqv? input #\e))
-                (let-if (eqv? page 'todopage)
-                  ((new-todo (edit-entry-dialog todo cursor)) (new-done done))
-                  ((new-todo todo) (new-done (edit-entry-dialog done cursor)))
-                  (update new-todo new-done cursor top page)))
-              ; (C)heck
-              ((or (eqv? input #\C) (eqv? input #\c))
-                (let-if* (eqv? page 'todopage)
-                  ((entry new-todo (extract-entry todo cursor))
-                   (new-done (insert-entry done entry)))
-                  ((entry new-done (extract-entry done cursor))
-                   (new-todo (insert-entry todo entry)))
-                  (update new-todo new-done cursor top page)))
-              ; (L)ater
-              ((or (eqv? input #\L) (eqv? input #\l))
-                (if (eqv? page 'todopage)
-                  (let ((new-todo (defer-entry-dialog todo cursor)))
-                    (update new-todo done cursor top page))
-                  (update todo done cursor top page)))
-              ; (T)oggle
-              ((or (eqv? input #\T) (eqv? input #\t))
-                (if (eqv? page 'todopage)
-                  (update todo done 0 0 'donepage)
-                  (update todo done 0 0 'todopage)))
-              ; Up and Down arrow
-              ((or (= (char->integer input) KEY_DOWN)
-                   (= (char->integer input) KEY_UP))
-                (let-if (eqv? page 'todopage)
-                  ((new-cursor new-top (move-cursor todo cursor top input)))
-                  ((new-cursor new-top (move-cursor done cursor top input)))
-                  (update todo done new-cursor new-top page)))
-              ; Refresh
-              (else
-                (update todo done cursor top page))))))))
+            ; then wait input to process
+            (let ((input (getch)))
+              (cond
+                ; (Q)uit
+                ((or (eqv? input #\Q) (eqv? input #\q))
+                  (save (list todo done))) 
+                ; (N)ew
+                ((or (eqv? input #\N) (eqv? input #\n))
+                  (update (new-entry-dialog todo) done 0 0 'todopage))
+                ; (D)elete
+                ((or (eqv? input #\D) (eqv? input #\d))
+                  (let-if (eqv? page 'todopage)
+                    ((new-todo (remove-entry todo cursor)) (new-done done))
+                    ((new-todo todo) (new-done (remove-entry done cursor)))
+                    (update new-todo new-done cursor top page)))
+                ; (E)dit
+                ((or (eqv? input #\E) (eqv? input #\e))
+                  (let-if (eqv? page 'todopage)
+                    ((new-todo (edit-entry-dialog todo cursor)) (new-done done))
+                    ((new-todo todo) (new-done (edit-entry-dialog done cursor)))
+                    (update new-todo new-done cursor top page)))
+                ; (C)heck
+                ((or (eqv? input #\C) (eqv? input #\c))
+                  (let-if* (eqv? page 'todopage)
+                    ((entry new-todo (extract-entry todo cursor))
+                     (new-done (insert-entry done entry)))
+                    ((entry new-done (extract-entry done cursor))
+                     (new-todo (insert-entry todo entry)))
+                    (update new-todo new-done cursor top page)))
+                ; (L)ater
+                ((or (eqv? input #\L) (eqv? input #\l))
+                  (if (eqv? page 'todopage)
+                    (let ((new-todo (defer-entry-dialog todo cursor)))
+                      (update new-todo done cursor top page))
+                    (update todo done cursor top page)))
+                ; (T)oggle
+                ((or (eqv? input #\T) (eqv? input #\t))
+                  (if (eqv? page 'todopage)
+                    (update todo done 0 0 'donepage)
+                    (update todo done 0 0 'todopage)))
+                ; Up and Down arrow
+                ((or (= (char->integer input) KEY_DOWN)
+                     (= (char->integer input) KEY_UP))
+                  (let-if (eqv? page 'todopage)
+                    ((new-cursor new-top (move-cursor todo cursor top input)))
+                    ((new-cursor new-top (move-cursor done cursor top input)))
+                    (update todo done new-cursor new-top page)))
+                ; Refresh
+                (else
+                  (update todo done cursor top page)))))))))
   (endwin))
 
 ;;;
