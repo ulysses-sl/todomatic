@@ -45,11 +45,8 @@
 ;;; -Save auto-complete trie when the entry is saved
 ;;;
 
-(require-extension srfi-19)
-(require-extension srfi-71)
-(require-extension ncurses)
-(require-extension directory-utils)
 (use extras utils files srfi-1 srfi-13 srfi-14)
+(use srfi-19 srfi-71 ncurses directory-utils)
 (import-for-syntax matchable)
 
 ;;;
@@ -123,7 +120,7 @@
 (define (lookup-entry data cursor)
   (cond ((null? data) '())
         ((= cursor 0) (car data))
-        (else (loopup-entry (cdr data) (-- cursor)))))
+        (else (lookup-entry (cdr data) (-- cursor)))))
 
 ;;; Compare between entries for (sort lst less?) procedure
 (define (earlier? entry1 entry2)
@@ -173,7 +170,8 @@
   (init_pair 10 COLOR_WHITE COLOR_BLUE)  ; page indicator (todo/done)
   (init_pair 11 COLOR_BLACK COLOR_BLACK) ; menu/form
   (init_pair 12 COLOR_RED COLOR_WHITE)   ; title center O
-  (init_pair 13 COLOR_BLUE COLOR_WHITE)) ; title "To-d-O-matic"
+  (init_pair 13 COLOR_BLUE COLOR_WHITE)
+  (init_pair 14 COLOR_CYAN COLOR_BLACK)) ; title "To-d-O-matic"
 
 (define-syntax text-color
   (ir-macro-transformer
@@ -190,11 +188,14 @@
 
 ; color scheme for texts
 (define text-normal      (text-color 1))
+(define text-normal-hl   (text-color 1 'bold))
 (define text-title       (text-color 13))
 (define text-title-O     (text-color 12 'bold))
 (define text-menu        (text-color 11 'bold))
 (define text-menu-hl     (text-color 3 'bold))
 (define text-indicator   (text-color 10 'bold))
+(define text-input       (text-color 14))
+(define text-input-hl    (text-color 14 'bold))
 ; entry colors scheme
 (define text-entry       (text-color 1 'bold))
 (define text-entry-hl    (text-color 2 'bold))
@@ -297,7 +298,7 @@
       (draw-upper-half data cursor top)
       (line-split (+ 3 (visible-lines)))
       ; draw lower-half
-      ;(draw-lower-half (lookup-entry data cursor))
+      (draw-lower-half (lookup-entry data cursor))
       (refresh)))
 
 (define (visible-lines)
@@ -375,6 +376,57 @@
                  (else
                    (iterate-entries (cdr data) cursor top (++ lines) screen-pos))))))
     (iterate-entries data cursor top 0 0)))
+
+(define (draw-lower-half entry)
+  (if (not (null? entry))
+    (let* ((entry-date (string->list (date->string (time->date (car entry)))))
+           (day (list->string (take entry-date 3)))
+            (month (list->string (drop (take entry-date 7) 4)))
+            (date (list->string (drop (take entry-date 10) 8)))
+            (hour (list->string (drop (take entry-date 13) 11)))
+            (minute (list->string (drop (take entry-date 16) 14)))
+            (year (list->string (take-right entry-date 2)))
+            (title (car (take-right entry 2)))
+            (detail (last entry)))
+      (move (+ 4 (visible-lines)) 1)
+      (text-menu)
+      (addstr "20")
+      (text-input)
+      (addstr year)
+    
+      (text-menu)
+      (addstr " ")
+      (text-input)
+      (addstr month)
+    
+      (text-menu)
+      (addstr " ")
+      (text-input)
+      (addstr date)
+    
+      (text-menu)
+      (addstr " (")
+      (text-input)
+      (addstr day)
+    
+      (text-menu)
+      (addstr ") ")
+      (text-input)
+      (addstr hour)
+    
+      (text-menu)
+      (addstr ":")
+      (text-input)
+      (addstr minute)
+    
+      (move (+ 5 (visible-lines)) 1)
+      (text-input)
+      (addstr title)
+    
+      (move (+ 6 (visible-lines)) 1)
+      (text-input)
+      (addstr detail))
+  (refresh)))
 
 (define (new-entry-dialog data)
   (insert-entry data `(,(current-time) "categor1" "categor2" "title" "whatever lorem ipsum")))
