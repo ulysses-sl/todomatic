@@ -12,7 +12,7 @@ Written in Chicken Scheme 4.8.0
 Description
 -----------
 
-To-d-O-Matic is a console-based to-do planner with the ncurses frontend and a corny name. It is designed to be lightweight, minimalistic, and intuitive, and is made for those who always keep at least one console window open, who do not trust the web-based to-do apps with slow response and excessive eye-candy, and who do not have time to check their "iWhatever" devices every five minutes.
+To-d-O-Matic is a continuation-based console interface to-do planner with the ncurses frontend and a corny name. It is designed to be lightweight, minimalistic, and intuitive, and is made for those who always keep at least one console window open, who do not trust the web-based to-do apps with slow response and excessive eye-candy, and who do not have time to check their "iWhatever" devices every five minutes.
 
 This software is under alpha stage, and many features are not implemented.
 
